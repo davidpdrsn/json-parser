@@ -1,0 +1,1 @@
+This is a simple JSON parser I built live on [stream](https://twitch.tv/davidpdrsn). It is intended to demonstrate how parser combinator libraries work and not to be a fully spec compliant JSON parser. You probably want [serde-json](https://crates.io/crates/serde_json) for that.
