@@ -180,6 +180,34 @@ enum Either<A, B> {
     B(B),
 }
 
+trait EitherGet<A> {
+    fn get(self) -> A;
+}
+
+/// Base Case impl that allows every value to return itself
+impl<T> EitherGet<T> for T {
+    fn get(self) -> T {
+        self
+    }
+}
+
+/// Impl that allows arbitrary nesting of `Either` enums if both A and B return
+/// the same value from `EitherGet`. Note how this impl does not conflict with
+/// the other one because the return type/ generic Type of `EitherGet` is never
+/// equal to Self (which is the case in the above impl).
+impl<A, B> EitherGet<B> for Either<A, B>
+where
+    A: EitherGet<B>,
+    B: EitherGet<B>,
+{
+    fn get(self) -> B {
+        match self {
+            Either::A(a) => a.get(),
+            Either::B(b) => b.get(),
+        }
+    }
+}
+
 #[derive(Debug)]
 struct ZipRight<P, P2> {
     parser: P,
@@ -386,13 +414,7 @@ impl Parse for JsonParser {
             .or(json_string())
             .or(json_array())
             .or(json_object())
-            .map(|x| match x {
-                Either::A(Either::A(Either::A(Either::A(x)))) => x,
-                Either::A(Either::A(Either::A(Either::B(x)))) => x,
-                Either::A(Either::A(Either::B(x))) => x,
-                Either::A(Either::B(x)) => x,
-                Either::B(x) => x,
-            });
+            .map(|x| x.get());
 
         parser.parse(input)
     }
