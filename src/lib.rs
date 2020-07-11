@@ -308,7 +308,7 @@ impl Parse for NumberParser {
     fn parse<'a>(&mut self, input: &'a str) -> Result<(Self::Output, &'a str), ParseError> {
         let numbers = input
             .chars()
-            .take_while(|c| c.is_numeric())
+            .take_while(|c| c.is_digit(10))
             .collect::<String>();
 
         let len = numbers.len();
@@ -516,6 +516,12 @@ mod test {
             parse(number(), "a"),
             Err(ParseError::Msg("Expected number but got \"a\"".to_string()))
         );
+    }
+
+    #[test]
+    fn parse_number_persian_digit() {
+        let parsed = parse(number(), "۳");
+        assert_eq!(parsed, Err(ParseError::Msg("Expected number but got \"۳\"".to_string())));
     }
 
     #[test]
